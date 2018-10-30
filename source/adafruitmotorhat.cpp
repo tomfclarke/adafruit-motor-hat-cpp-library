@@ -26,7 +26,7 @@
 
 #include "adafruitmotorhat.h"
 
-AdafruitMotorHAT::AdafruitMotorHAT (int address = 0x60, int freq = 1600)
+AdafruitMotorHAT::AdafruitMotorHAT (int address, int freq)
     : controller (address)
     , frequency (freq)
 {
