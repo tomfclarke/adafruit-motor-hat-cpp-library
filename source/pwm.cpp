@@ -39,8 +39,8 @@ PWM::PWM (int deviceAddress)
         std::cout << std::endl;
 
         setAll (0, 0);
-        device.write8 (Registers::kMode1, Bits::kOutDrive);
-        device.write8 (Registers::kMode2, Bits::kAllCall);
+        device.write8 (Registers::kMode2, Bits::kOutDrive);
+        device.write8 (Registers::kMode1, Bits::kAllCall);
 
         // wait for oscillator
         std::this_thread::sleep_for (std::chrono::milliseconds (5));
