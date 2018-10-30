@@ -27,6 +27,7 @@
 #include "i2cdevice.h"
 
 #include <cerrno>
+#include <cstring>
 #include <iostream>
 
 I2CDevice::I2CDevice (int deviceAddress)
