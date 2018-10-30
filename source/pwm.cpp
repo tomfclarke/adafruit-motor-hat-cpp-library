@@ -47,7 +47,7 @@ PWM::PWM (int deviceAddress)
 
         int mode = device.read8 (Registers::kMode1);
         // reset sleep
-        mode = mode & ~sleep;
+        mode = mode & ~Bits::kSleep;
         device.write8 (Registers::kMode1, mode);
 
         // wait for oscillator
