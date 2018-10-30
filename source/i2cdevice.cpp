@@ -24,7 +24,7 @@
  *  SOFTWARE.
  */
 
-#include "i2c_device.h"
+#include "i2cdevice.h"
 
 #include <cerrno>
 #include <iostream>
