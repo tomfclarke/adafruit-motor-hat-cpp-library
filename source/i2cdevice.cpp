@@ -72,4 +72,6 @@ int I2CDevice::read8 (int deviceRegister)
 
         return data;
     }
+
+    return -1;
 }
