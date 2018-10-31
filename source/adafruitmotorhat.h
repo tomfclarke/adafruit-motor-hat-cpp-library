@@ -42,7 +42,7 @@ public:
      *  If the number is out-of-range, the shared pointer
      *  returned from the method will be empty.
      */
-    std::shared_ptr<AdafruitDCMotor> getMotor (int number);
+    std::shared_ptr<AdafruitDCMotor> getMotor (unsigned int number);
 
 private:
     PWM controller;

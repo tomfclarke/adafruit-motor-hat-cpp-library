@@ -40,7 +40,7 @@ AdafruitMotorHAT::AdafruitMotorHAT (int address, int freq)
     controller.setFrequency (frequency);
 }
 
-std::shared_ptr<AdafruitDCMotor> AdafruitMotorHAT::getMotor (int number)
+std::shared_ptr<AdafruitDCMotor> AdafruitMotorHAT::getMotor (unsigned int number)
 {
     if (number > 0 && number <= dcMotors.size())
         return std::shared_ptr<AdafruitDCMotor> (dcMotors[number - 1]);
