@@ -70,23 +70,28 @@ void PWM::setFrequency (double frequency)
         std::cout << std::endl;
         std::cout << "Estimated pre-scale: " << preScaleValue << std::endl;
 
+        const int currentPreScale = device.read8 (Registers::kPreScale);
         const int finalPreScale = static_cast<int> (preScaleValue + 0.5);
         std::cout << "Final pre-scale: " << finalPreScale << std::endl;
 
-        const int oldMode = device.read8 (Registers::kMode1);
-        const int newMode = (oldMode & 0x7F) | Bits::kSleep;
+        // check that we actually need to change the frequency
+        if (currentPreScale != finalPreScale)
+        {
+            const int oldMode = device.read8 (Registers::kMode1);
+            const int newMode = (oldMode & 0x7F) | Bits::kSleep;
 
-        // go to sleep
-        device.write8 (Registers::kMode1, newMode);
-        // set prescale
-        device.write8 (Registers::kPreScale, finalPreScale);
-        // wake up
-        device.write8 (Registers::kMode1, oldMode);
+            // go to sleep
+            device.write8 (Registers::kMode1, newMode);
+            // set prescale
+            device.write8 (Registers::kPreScale, finalPreScale);
+            // wake up
+            device.write8 (Registers::kMode1, oldMode);
 
-        std::this_thread::sleep_for (std::chrono::milliseconds (5));
+            std::this_thread::sleep_for (std::chrono::milliseconds (5));
 
-        // restart
-        device.write8 (Registers::kMode1, oldMode | Bits::kRestart);
+            // restart
+            device.write8 (Registers::kMode1, oldMode | Bits::kRestart);
+        }
     }
 }
 
