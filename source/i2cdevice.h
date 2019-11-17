@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include <wiringPiI2C.h>
+#include <linux/i2c-dev.h>
 
 /** Represents an I2C device.
  *
@@ -37,7 +37,7 @@
 class I2CDevice
 {
 public:
-    I2CDevice (int deviceAddress);
+    I2CDevice (int i2cAddress);
 
     bool isValid();
 
@@ -45,6 +45,7 @@ public:
     int read8 (int deviceRegister);
 
 private:
+    const int busNumber;
     const int address;
-    const int handle;
+    int handle;
 };

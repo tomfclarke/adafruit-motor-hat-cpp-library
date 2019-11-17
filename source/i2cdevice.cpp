@@ -29,11 +29,34 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
+#include <string>
 
-I2CDevice::I2CDevice (int deviceAddress)
-    : address (deviceAddress)
-    , handle (wiringPiI2CSetup (address))
+#include "sys/stat.h"
+#include "fcntl.h"
+
+int getDefaultBusNumber()
 {
+    // TODO: work out which revision of Raspberry PI we're
+    // running on and return the correct bus number.
+    // Revision 1 uses bus 0
+    // Revision 2 uses bus 1
+    return 1;
+}
+
+std::string getFilenameForBus (int busNumber)
+{
+    return "/dev/i2c-" + std::to_string (busNumber);
+}
+
+I2CDevice::I2CDevice (int i2cAddress)
+    : busNumber (getDefaultBusNumber())
+    , address (i2cAddress)
+    , handle (-1)
+{
+    std::string filename (getFilenameForBus (busNumber));
+
+    handle = open (filename.c_str(), O_RDWR);
+
     if (handle == -1)
     {
         std::cerr << "Couldn't open device: ";
@@ -50,7 +73,9 @@ void I2CDevice::write8 (int deviceRegister, int data)
 {
     if (isValid())
     {
-        if (wiringPiI2CWriteReg8 (handle, deviceRegister, data) < 0)
+        bool success = false;
+
+        if (!success)
         {
             std::cerr << "Failed to write to device: ";
             std::cerr << std::strerror (errno) << std::endl;
@@ -62,7 +87,7 @@ int I2CDevice::read8 (int deviceRegister)
 {
     if (isValid())
     {
-        int data = wiringPiI2CReadReg8 (handle, deviceRegister);
+        int data = -1;
 
         if (data < 0)
         {
