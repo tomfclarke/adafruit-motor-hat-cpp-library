@@ -1,5 +1,5 @@
 /**
- *  i2cdevice.h
+ *  util.h
  *
  *  MIT License
  *
@@ -26,26 +26,24 @@
 
 #pragma once
 
-#include <linux/i2c-dev.h>
+#include <cerrno>
+#include <cstring>
+#include <iostream>
+#include <exception>
 
-/** Represents an I2C device.
- *
- *  Uses ioctl to control an I2C device.
- */
-class I2CDevice
+namespace log
 {
-public:
-    I2CDevice (int i2cAddress);
+    template<typename MessageType>
+    void error (MessageType message)
+    {
+        std::cerr << message << std::endl;
+    }
 
-    bool isValid();
+    template<typename MessageType>
+    void strerror (MessageType message)
+    {
+        std::cerr << message << ": ";
+        std::cerr << std::strerror (errno) << std::endl;
+    }
+}
 
-    void write8 (int deviceRegister, int data);
-    int read8 (int deviceRegister);
-
-private:
-    void selectDevice ();
-
-    const int busNumber;
-    const int address;
-    int handle;
-};

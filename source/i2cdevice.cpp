@@ -25,14 +25,13 @@
  */
 
 #include "i2cdevice.h"
+#include "util.h"
 
-#include <cerrno>
-#include <cstring>
-#include <iostream>
 #include <string>
 
-#include "sys/stat.h"
-#include "fcntl.h"
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
 
 int getDefaultBusNumber()
 {
@@ -59,8 +58,7 @@ I2CDevice::I2CDevice (int i2cAddress)
 
     if (handle == -1)
     {
-        std::cerr << "Couldn't open device: ";
-        std::cerr << std::strerror (errno) << std::endl;
+        log::strerror ("Couldn't open device");
     }
 }
 
@@ -73,12 +71,13 @@ void I2CDevice::write8 (int deviceRegister, int data)
 {
     if (isValid())
     {
+        selectDevice();
+
         bool success = false;
 
         if (!success)
         {
-            std::cerr << "Failed to write to device: ";
-            std::cerr << std::strerror (errno) << std::endl;
+            log::strerror ("Failed to write to device");
         }
     }
 }
@@ -87,16 +86,25 @@ int I2CDevice::read8 (int deviceRegister)
 {
     if (isValid())
     {
+        selectDevice();
+
         int data = -1;
 
         if (data < 0)
         {
-            std::cerr << "Failed to read from device: ";
-            std::cerr << std::strerror (errno) << std::endl;
+            log::strerror ("Failed to read from device");
         }
 
         return data;
     }
 
     return -1;
+}
+
+void I2CDevice::selectDevice()
+{
+    if (ioctl (handle, I2C_SLAVE, address & 0x7F) < 0)
+    {
+        log::strerror ("Failed to select device");
+    }
 }
