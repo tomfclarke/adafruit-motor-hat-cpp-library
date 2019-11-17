@@ -43,7 +43,9 @@ public:
     int read8 (int deviceRegister);
 
 private:
-    void selectDevice ();
+    void selectDevice();
+    void writeByteData (int deviceRegister, int data);
+    int readByteData (int deviceRegister);
 
     const int busNumber;
     const int address;

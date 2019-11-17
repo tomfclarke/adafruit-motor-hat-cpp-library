@@ -25,8 +25,8 @@
  */
 
 #include "pwm.h"
+#include "util.h"
 
-#include <iostream>
 #include <thread>
 #include <chrono>
 
@@ -35,8 +35,7 @@ PWM::PWM (int deviceAddress)
 {
     if (device.isValid())
     {
-        std::cout << "Resetting PCA9685 mode 1 (without sleep) and mode 2";
-        std::cout << std::endl;
+        log::output ("Resetting PCA9685 mode 1 (without sleep) and mode 2");
 
         setAll (0, 0);
         device.write8 (Registers::kMode2, Bits::kOutDrive);
@@ -66,12 +65,12 @@ void PWM::setFrequency (double frequency)
         preScaleValue /= frequency;
         preScaleValue -= 1.0;
 
-        std::cout << "Setting PWM frequency to " << frequency << "Hz";
-        std::cout << std::endl;
-        std::cout << "Estimated pre-scale: " << preScaleValue << std::endl;
+        log::output ("Setting PWM frequency to " + std::to_string (frequency) + "Hz");
+        log::output ("Estimated pre-scale: " + std::to_string (preScaleValue));
 
         const int finalPreScale = static_cast<int> (preScaleValue + 0.5);
-        std::cout << "Final pre-scale: " << finalPreScale << std::endl;
+
+        log::output ("Final pre-scale: " + std::to_string (finalPreScale));
 
         const int oldMode = device.read8 (Registers::kMode1);
         const int newMode = (oldMode & 0x7F) | Bits::kSleep;

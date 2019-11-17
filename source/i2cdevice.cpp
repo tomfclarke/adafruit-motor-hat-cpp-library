@@ -29,6 +29,7 @@
 
 #include <string>
 
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -72,13 +73,7 @@ void I2CDevice::write8 (int deviceRegister, int data)
     if (isValid())
     {
         selectDevice();
-
-        bool success = false;
-
-        if (!success)
-        {
-            log::strerror ("Failed to write to device");
-        }
+        writeByteData (deviceRegister, data);
     }
 }
 
@@ -87,17 +82,8 @@ int I2CDevice::read8 (int deviceRegister)
     if (isValid())
     {
         selectDevice();
-
-        int data = -1;
-
-        if (data < 0)
-        {
-            log::strerror ("Failed to read from device");
-        }
-
-        return data;
+        return readByteData (deviceRegister);
     }
-
     return -1;
 }
 
@@ -107,4 +93,31 @@ void I2CDevice::selectDevice()
     {
         log::strerror ("Failed to select device");
     }
+}
+
+void I2CDevice::writeByteData (int deviceRegister, int data)
+{
+    char buffer[2] =
+    {
+        static_cast<char>(deviceRegister & 0xFF),
+        static_cast<char>(data & 0xFF)
+    };
+
+    if (write (handle, buffer, 2) != 2)
+    {
+        log::strerror ("Failed to write to device");
+    }
+}
+
+int I2CDevice::readByteData (int deviceRegister)
+{
+    char buffer { 0 };
+
+    if (read (handle, &buffer, 1) != 1)
+    {
+        log::strerror ("Failed to read from device");
+        return -1;
+    }
+
+    return static_cast<int>(buffer);
 }

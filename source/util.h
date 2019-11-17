@@ -33,12 +33,27 @@
 
 namespace log
 {
+    /**
+        Writes a message to stdout.
+    */
+    template<typename MessageType>
+    void output (MessageType message)
+    {
+        std::cout << message << std::endl;
+    }
+
+    /**
+        Writes a message to stderr.
+    */
     template<typename MessageType>
     void error (MessageType message)
     {
         std::cerr << message << std::endl;
     }
 
+    /**
+        Writes a message to stderr with the errno string appended.
+    */
     template<typename MessageType>
     void strerror (MessageType message)
     {
