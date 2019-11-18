@@ -36,6 +36,7 @@ class I2CDevice
 {
 public:
     I2CDevice (int i2cAddress);
+    ~I2CDevice();
 
     bool isValid();
 
@@ -43,6 +44,9 @@ public:
     int read8 (int deviceRegister);
 
 private:
+    void openHandle();
+    void closeHandle();
+
     void selectDevice();
     void writeByteData (int deviceRegister, int data);
     int readByteData (int deviceRegister);

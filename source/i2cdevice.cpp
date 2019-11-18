@@ -53,14 +53,11 @@ I2CDevice::I2CDevice (int i2cAddress)
     , address (i2cAddress)
     , handle (-1)
 {
-    std::string filename (getFilenameForBus (busNumber));
-
-    handle = open (filename.c_str(), O_RDWR);
-
-    if (handle == -1)
-    {
-        log::strerror ("Couldn't open device");
-    }
+    openHandle();
+}
+I2CDevice::~I2CDevice()
+{
+    closeHandle();
 }
 
 bool I2CDevice::isValid()
@@ -85,6 +82,31 @@ int I2CDevice::read8 (int deviceRegister)
         return readByteData (deviceRegister);
     }
     return -1;
+}
+
+void I2CDevice::openHandle()
+{
+    closeHandle();
+
+    std::string filename (getFilenameForBus (busNumber));
+
+    handle = open (filename.c_str(), O_RDWR);
+
+    if (!isValid())
+    {
+        log::strerror ("Couldn't open device");
+    }
+}
+
+void I2CDevice::closeHandle()
+{
+    if (isValid())
+    {
+        if (close (handle) < 0)
+        {
+            log::strerror ("Couldn't close device");
+        }
+    }
 }
 
 void I2CDevice::selectDevice()
