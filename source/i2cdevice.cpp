@@ -36,11 +36,9 @@
 
 int getDefaultBusNumber()
 {
-    // TODO: work out which revision of Raspberry PI we're
-    // running on and return the correct bus number.
     // Revision 1 uses bus 0
-    // Revision 2 uses bus 1
-    return 1;
+    // Revision 2 or greater uses bus 1
+    return util::getRaspberryPiRevisionNumber() > 1 ? 1 : 0;
 }
 
 std::string getFilenameForBus (int busNumber)
