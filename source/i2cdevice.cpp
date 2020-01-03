@@ -25,20 +25,37 @@
  */
 
 #include "i2cdevice.h"
+#include "util.h"
 
-#include <cerrno>
-#include <cstring>
-#include <iostream>
+#include <string>
 
-I2CDevice::I2CDevice (int deviceAddress)
-    : address (deviceAddress)
-    , handle (wiringPiI2CSetup (address))
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+
+int getDefaultBusNumber()
 {
-    if (handle == -1)
-    {
-        std::cerr << "Couldn't open device: ";
-        std::cerr << std::strerror (errno) << std::endl;
-    }
+    // Revision 1 uses bus 0
+    // Revision 2 or greater uses bus 1
+    return util::getRaspberryPiRevisionNumber() > 1 ? 1 : 0;
+}
+
+std::string getFilenameForBus (int busNumber)
+{
+    return "/dev/i2c-" + std::to_string (busNumber);
+}
+
+I2CDevice::I2CDevice (int i2cAddress)
+    : busNumber (getDefaultBusNumber())
+    , address (i2cAddress)
+    , handle (-1)
+{
+    openHandle();
+}
+I2CDevice::~I2CDevice()
+{
+    closeHandle();
 }
 
 bool I2CDevice::isValid()
@@ -50,11 +67,8 @@ void I2CDevice::write8 (int deviceRegister, int data)
 {
     if (isValid())
     {
-        if (wiringPiI2CWriteReg8 (handle, deviceRegister, data) < 0)
-        {
-            std::cerr << "Failed to write to device: ";
-            std::cerr << std::strerror (errno) << std::endl;
-        }
+        selectDevice();
+        writeByteData (deviceRegister, data);
     }
 }
 
@@ -62,16 +76,68 @@ int I2CDevice::read8 (int deviceRegister)
 {
     if (isValid())
     {
-        int data = wiringPiI2CReadReg8 (handle, deviceRegister);
+        selectDevice();
+        return readByteData (deviceRegister);
+    }
+    return -1;
+}
 
-        if (data < 0)
+void I2CDevice::openHandle()
+{
+    closeHandle();
+
+    std::string filename (getFilenameForBus (busNumber));
+
+    handle = open (filename.c_str(), O_RDWR);
+
+    if (!isValid())
+    {
+        log::strerror ("Couldn't open device");
+    }
+}
+
+void I2CDevice::closeHandle()
+{
+    if (isValid())
+    {
+        if (close (handle) < 0)
         {
-            std::cerr << "Failed to read from device: ";
-            std::cerr << std::strerror (errno) << std::endl;
+            log::strerror ("Couldn't close device");
         }
+    }
+}
 
-        return data;
+void I2CDevice::selectDevice()
+{
+    if (ioctl (handle, I2C_SLAVE, address & 0x7F) < 0)
+    {
+        log::strerror ("Failed to select device");
+    }
+}
+
+void I2CDevice::writeByteData (int deviceRegister, int data)
+{
+    char buffer[2] =
+    {
+        static_cast<char>(deviceRegister & 0xFF),
+        static_cast<char>(data & 0xFF)
+    };
+
+    if (write (handle, buffer, 2) != 2)
+    {
+        log::strerror ("Failed to write to device");
+    }
+}
+
+int I2CDevice::readByteData (int deviceRegister)
+{
+    char buffer { 0 };
+
+    if (read (handle, &buffer, 1) != 1)
+    {
+        log::strerror ("Failed to read from device");
+        return -1;
     }
 
-    return -1;
+    return static_cast<int>(buffer);
 }

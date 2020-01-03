@@ -26,18 +26,17 @@
 
 #pragma once
 
-#include <wiringPiI2C.h>
+#include <linux/i2c-dev.h>
 
 /** Represents an I2C device.
  *
- *  Uses the wiringPi library to setup an
- *  I2C device and provide an interface
- *  for read/write operations.
+ *  Uses ioctl to control an I2C device.
  */
 class I2CDevice
 {
 public:
-    I2CDevice (int deviceAddress);
+    I2CDevice (int i2cAddress);
+    ~I2CDevice();
 
     bool isValid();
 
@@ -45,6 +44,14 @@ public:
     int read8 (int deviceRegister);
 
 private:
+    void openHandle();
+    void closeHandle();
+
+    void selectDevice();
+    void writeByteData (int deviceRegister, int data);
+    int readByteData (int deviceRegister);
+
+    const int busNumber;
     const int address;
-    const int handle;
+    int handle;
 };

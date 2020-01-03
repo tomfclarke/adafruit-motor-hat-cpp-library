@@ -25,6 +25,7 @@
  */
 
 #include "adafruitdcmotor.h"
+#include "util.h"
 
 #include <iostream>
 #include <algorithm>
@@ -55,7 +56,7 @@ AdafruitDCMotor::AdafruitDCMotor (PWM& pwm, int index)
             in1Pin = 5;
             break;
         default:
-            std::cerr << "Motor index out-of-range. Must be between 1 and 4 inclusive." << std::endl;
+            log::error ("Motor index out-of-range. Must be between 0 and 3 inclusive.");
             break;
     }
 }
@@ -91,7 +92,7 @@ void AdafruitDCMotor::setPin (int pin, bool enabled)
 {
     if (pin < 0 || pin > 15)
     {
-        std::cerr << "Failed to set PWM pin " << pin << ". Must be between 0 and 15 inclusive." << std::endl;
+        log::error ("Failed to set PWM pin " + std::to_string (pin) + ". Must be between 0 and 15 inclusive.");
         return;
     }
 
