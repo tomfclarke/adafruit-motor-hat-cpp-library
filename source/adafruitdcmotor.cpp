@@ -73,6 +73,10 @@ void AdafruitDCMotor::run (Command command)
             setPin (in1Pin, false);
             setPin (in2Pin, true);
             break;
+        case kBrake:
+            setPin (in1Pin, true);
+            setPin (in2Pin, true);
+            break;
         case kRelease:
             setPin (in1Pin, false);
             setPin (in2Pin, false);
